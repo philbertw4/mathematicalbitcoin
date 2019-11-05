@@ -18,5 +18,6 @@ Probably more than we currently realize. However, the nice thing about a monad i
 ## Progress Updates
 1. Oct 19, 2019 -- included bitcoin-s library and a scala worksheet (depends on ammonite being installed) to play with manual construction of transactions and such.
 
+2. Nov 4, 2019 -- some musings about [bitcoin space and time, renting versus buying](blob/master/RentingVsBuying.md) 
 ## Todo
 1. Document build instructions (including ammonite and mill for building scala)
