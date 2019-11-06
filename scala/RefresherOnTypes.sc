@@ -19,6 +19,12 @@ trait Category[-->[_,_]] {
 
 object Category {
     def apply[-->[_,_] : Category]: Category[-->] = implicitly
+
+    //a generic class that provides some convenient syntax
+    implicit class categorySyntax[-->[_,_] : Category, A, B](ab: A --> B) {
+        def andThen[C](bc: B --> C): A --> C = Category[-->].compose(ab)(bc)
+        def after[C](ca: C --> A): C --> B = Category[-->].compose(ca)(ab)
+    }
 }
 
 /**
@@ -29,3 +35,21 @@ implicit val categoryOfTypesAndFunctions = new Category[Function1]{
     def id[A]: A => A = identity
     def compose[A,B,C]: (A => B) => (B => C) => A => C = f => g => f andThen g
 }
+
+import Category._
+
+val Void = Category[Function1].id[Nothing]
+
+val Unit = Category[Function1].id[Unit]
+
+val True: Unit => Boolean = (u: Unit) => true
+
+val False: Unit => Boolean = (u: Unit) => false
+
+val Not: Boolean => Boolean = b => b match { case true => false; case false => true }
+
+//demonstrating some different syntax
+val notTrue1 = True andThen Not   // Unit => false
+val notTrue2 = Not after True     // Unit => false
+
+
