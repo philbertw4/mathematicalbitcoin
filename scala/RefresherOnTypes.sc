@@ -38,9 +38,13 @@ implicit val categoryOfTypesAndFunctions = new Category[Function1]{
 
 import Category._
 
-val Void = Category[Function1].id[Nothing]
+def absurd[A]: Nothing => A = n => n
 
-val Unit = Category[Function1].id[Unit]
+def unit[A]: A => Unit = a => ()
+
+//val Void = Category[Function1].id[Nothing]
+
+//val Unit = Category[Function1].id[Unit]
 
 val True: Unit => Boolean = (u: Unit) => true
 
@@ -51,5 +55,6 @@ val Not: Boolean => Boolean = b => b match { case true => false; case false => t
 //demonstrating some different syntax
 val notTrue1 = True andThen Not   // Unit => false
 val notTrue2 = Not after True     // Unit => false
+val unitThenTrue = unit[Boolean] andThen True
 
 
