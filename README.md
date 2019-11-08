@@ -21,5 +21,7 @@ Probably more than we currently realize. However, the nice thing about a monad i
 2. Nov 4, 2019 -- some musings about [bitcoin space and time, renting versus buying](RentingVsBuying.md) 
 
 3. Nov 5, 2019 -- refresher about [types and functions in programming languages](scala/RefresherOnTypes.sc)
+
+4. Nov 7, 2019 -- some [typclassery around the notion of information-theoretic entropy](scala/EntropyTypeclass.sc)
 ## Todo
 1. Document build instructions (including ammonite and mill for building scala)
