@@ -51,11 +51,12 @@ object Cardinality {
 */
 
 sealed trait FairCoin
-final class Heads extends FairCoin
-final class Tails extends FairCoin
 object FairCoin {
-    // naive implementation of a flip method. In a real implementation we might want to use a seed, etc or base it on a cryptographic pseudorandom number generator
-    def flip: FairCoin = scala.util.Random.nextBoolean match { case true => new Heads; case false => new Tails }
+    sealed trait Heads extends FairCoin { override def toString = "FairCoin.Heads" }
+    sealed trait Tails extends FairCoin { override def toString = "FairCoin.Tails" }
+
+    // naive implementation of a flip method. In a real implementation we would do this differently
+    def flip: FairCoin = scala.util.Random.nextBoolean match { case true => new Heads {}; case false => new Tails{} }
 }
 
 /**
