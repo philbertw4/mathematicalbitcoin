@@ -23,5 +23,8 @@ Probably more than we currently realize. However, the nice thing about a monad i
 3. Nov 5, 2019 -- refresher about [types and functions in programming languages](scala/RefresherOnTypes.sc)
 
 4. Nov 7, 2019 -- some [typclassery around the notion of information-theoretic entropy](scala/EntropyTypeclass.sc)
+
+5. Nov 8, 2019 -- [is Git a Category?](CategoricalGit.md)
+
 ## Todo
 1. Document build instructions (including ammonite and mill for building scala)
