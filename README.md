@@ -24,7 +24,7 @@ Probably more than we currently realize. However, the nice thing about a monad i
 
 4. Nov 7, 2019 -- some [typclassery around the notion of information-theoretic entropy](scala/EntropyTypeclass.sc)
 
-5. Nov 8, 2019 -- [is Git a Category?](CategoricalGit.md)
+5. Nov 8, 2019 -- [is Git a Category?](CategoricalGit.md). Updated Nov 9, 2019.
 
 ## Todo
 1. Document build instructions (including ammonite and mill for building scala)
