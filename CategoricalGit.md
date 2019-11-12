@@ -42,7 +42,7 @@ If we name our initial repository `0`, then we can think about using `0` with ou
 # Exponential Object
 In the category `Set` and also the category of types, there is an exponential object `a => b` for objects `a` and `b`. Intuitively this object represents a (total) function from object `a` to type `b` in the category `Set`. It is often more convenient, and visually appealing, to write the exponential object as `b^a`, which, if it were natural numbers we are talking about, is `b` raised to the power of `a`. Additionally, such a notation reminds us that, in many cases, there is a deep relationship between exponentiation and repeated multiplication.
 
-What is the natural notion of a function object, or an exponential object, in the context of `Git`?
+What is the natural notion of a function object, or an exponential object, in the context of `Git`? That is the question we seek to answer. In order to do so, it might be helpful to think about how function objects work in the category `Scala` (which is shorthand for the category of scala types and functions between types -- if we were talking about Haskell, we might call the category `Hask`). In the category `Scala`, how many functions are there of type `Boolean => Int`? Well, there are two inhabitants of `Boolean`, namely `true` and `false`. The function returns an `Integer`, but the value of that integer may be different depeneding on whether the value of the input (a `Boolean`) is `true` or `false`. In this sense, it may be helpful to consider `Boolean => Int` to be equivalent to `(Int,Int)` where we take the first value if the input is `true` and we take the second value if the input is `false`.
 
 # An Algebra of Git?
 
