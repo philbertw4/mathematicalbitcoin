@@ -50,8 +50,13 @@ What about the other way around? How many inhabitants of the type `Int => Boolea
 
 Unfortuntately, when the number of inhabitants of a type is infinite, it is difficult to reason about statements involving that type. This is one reason why we often restrict ourselves to talking about "finite types," and for similar reasons mathematicians often talk about "finite sets."
 
+Let us continue in our attempt to discover how or if an exponential object in the category `Git` exists. As illustrated above, we know that we can form the product of two git repositories. We will imagine for a bit that for two objects `A` and `B` that an object `A => B` exists. Then, when we form a pair `(A => B, A)` we are, in a logical sense, saying "if from A we can derive B, and we have A, then therefore B." In essence this boils down to function evaluation. But how does function evaluation work in the world of `Git`? What is a function in `Git`'s world? Perhaps our search for an initial object, which amounts to a defunct impossible repository, can lend us a clue. In the world of `Git` our objects are repositories at point in history and are represented by a carefully constructed hash value. If we restrict commit objects in git to referring to only a single parent hash (e.g. build upon a single path), then perhaps `(A => B,A)` is as simple as saying "B is the child of A, and since we have A, we know that we also have B"?
+
+To round this out, is our exponential object in `Git` simply the notion of performing a commit? It seems that this may be the case. In reference [2] there is mention that computation can be represented in a manner equivalent to the lambda calculus in any cartesian closed category. In fact there is a category `Graph` that does this in the case of graphs. Perhaps `Git` is simply a special case (sub category?) of `Graph`?
+
 # An Algebra of Git?
 
  
 ### References
 [1] helpful article with some philosphical/design decisions that were made about git - https://stackoverflow.com/questions/40710850/why-does-git-allow-using-wrong-values-in-user-name-and-user-email/40711852#40711852
+[2] todo: lookup and link to the article "compiling to categories." In it there is mention of how computation on graphs is equivalent to the lambda calculus in the sense that `Graph` can also be shown to be a cartesian closed category.
