@@ -35,6 +35,8 @@ Being able to describe bitcoin in purely abstract mathematical terms may provide
 
 6. Nov 10, 2019 -- Updated Readme
 
+7. Nov 14, 2019 -- some incomplete musings and calculations on [satoshis per bit](scala/SatsPerBit.sc)
+
 ## Ideas for Next Update
 1. Keep working through the categorical aspects of Git, trying to uncover any deep connections between the Git protcol and the Bitcoin protocol.
 2. Learn more about manually constructing bitcoin and lightning transactions
