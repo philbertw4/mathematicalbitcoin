@@ -57,6 +57,28 @@ object FairCoin {
 
     // naive implementation of a flip method. In a real implementation we would do this differently
     def flip: FairCoin = scala.util.Random.nextBoolean match { case true => new Heads {}; case false => new Tails{} }
+        
+}
+
+/**
+  The following typeclasses may not be necessary, or, rather, may be realistically too computationally expensive to use. However,
+  for sake of completeness, we will attempt to build up towards a calculation of entropy from scratch. Therefore we need a
+  type class that represents a probability mass function.
+**/
+trait Pmf[A] {
+    def pmf: A => BigDecimal
+}
+object Pmf {
+    def apply[A : Pmf]: Pmf[A] = implicitly
+    
+    implicit val unitPmf: Pmf[Unit] = new Pmf[Unit] {
+        def pmf: Unit => BigDecimal = u => BigDecimal(1.0) // Unit only has a single inhabitant
+    }
+
+    implicit val coinPmf: Pmf[FairCoin] = new Pmf[FairCoin] {
+        def pmf: FairCoin => BigDecimal = c => c match { case h: FairCoin.Heads => BigDecimal(0.5); case t: FairCoin.Tails => BigDecimal(0.5) }
+    }
+
 }
 
 /**
@@ -74,3 +96,4 @@ object Entropy {
         def entropy: BigDecimal = BigDecimal(1.0) //a fair coin with 50/50 odds yields 1 bit of entropy
     }
 }
+
