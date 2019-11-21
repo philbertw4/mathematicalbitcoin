@@ -64,12 +64,37 @@ val w = (-(BigDecimal(1) - p)*log(BigDecimal(1)-p,2) - p*log(p,2)) / p
                 x
 
 Here x is the position in the message. In this case our message is a block and we can model it as a line segment between two points. The values of the points
-along the line segment are the bit values of the message (e.g. 1 or 0) itself.
+along the line segment are the bit values of the message (e.g. 1 or 0) itself. This is not the only way to interpret this. For example, we might instead utilize a point (x,w,b) where x is the size of the block, w is the work of the block, and b is the block itself. Each of x and b are drawn from the set of natural numbers. However, w is from the set of real numbers.
+
+Let's build some definitions/functions, rather than just value calculations which may be helpful if we want to calculate these numbers for the existing bitcoin blockchain.
+
+Becuase it takes, on average, 2^32*Difficulty hashes to finde a block, we can calculate the work of a block directly from the difficulty by first calculating p.
 **/
 
- 
+def work(difficulty: BigInt): BigDecimal = {
+    // return right away if difficulty is 1, since, this gives p = 1 which yields entropy of 0
+    if(difficulty == BigInt(1)) return BigDecimal(0.0)
 
- 
+    // why this is not 2^256 is because the lowest difficulty was based on iterating through 2^32 hashes
+    val max_target = BigInt(2).pow(224)
 
+    val current_target = max_target / difficulty
+    
+    // let p be the probability of flipping heads on this extremely biased hash coin
+    // since the output of the hash function is approximately uniformly distributed
+    // calculating p is straightforward:
+    val p = BigDecimal(current_target) / BigDecimal(max_target)
+ 
+    // let w be the entropy (in bits) pertaining to the number of failures (hashes) until the first success
+    // this is a geometric distribution
+    val w = (-(BigDecimal(1) - p)*log(BigDecimal(1)-p,2) - p*log(p,2)) / p
+    w
+}
+
+import ammonite.ops._
+def difficultySequence = read.lines! pwd/'scala/"btcHistoricalDifficulty.csv" map(_.split(",")(2)) drop(1) map(BigInt(_))
+
+def accumWork = difficultySequence.map(work(_)).sum
+//res12: BigDecimal = 8724.803126658363972903393740660985
 
 
