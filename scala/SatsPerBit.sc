@@ -71,7 +71,7 @@ Let's build some definitions/functions, rather than just value calculations whic
 Becuase it takes, on average, 2^32*Difficulty hashes to finde a block, we can calculate the work of a block directly from the difficulty by first calculating p.
 **/
 
-def work(difficulty: BigInt): BigDecimal = {
+def calcWork(difficulty: BigInt): BigDecimal = {
     // return right away if difficulty is 1, since, this gives p = 1 which yields entropy of 0
     if(difficulty == BigInt(1)) return BigDecimal(0.0)
 
@@ -92,9 +92,23 @@ def work(difficulty: BigInt): BigDecimal = {
 }
 
 import ammonite.ops._
-def difficultySequence = read.lines! pwd/'scala/"btcHistoricalDifficulty.csv" map(_.split(",")(2)) drop(1) map(BigInt(_))
+//read difficulty as a BigInts from a csv file
+val readdifficultySequenceFromFile = read.lines! pwd/"btcHistoricalDifficulty.csv" map(_.split(",")(2)) drop(1) map(BigInt(_))
 
-def accumWork = difficultySequence.map(work(_)).sum
+def numHashesSequence = readdifficultySequenceFromFile.map(_ * BigInt(2).pow(32) * BigInt(2016))
+def accumNumHashesSequenceLog2 = (numHashesSequence.scanLeft(BigInt(1)){case (tot: BigInt, hashes: BigInt) => tot + hashes}).map(n => BigDecimal(n).log(2))
+
+//turn difficulty into work and keep a running total
+def workSequence = readdifficultySequenceFromFile map(calcWork(_)) map(_ * BigDecimal(2016))
+def accumWorkSequence = workSequence.scanLeft(BigDecimal(0.0)){case (tot:BigDecimal, diff:BigDecimal) => tot + diff}
+
+def accumWork = accumWorkSequence.last
 //res12: BigDecimal = 8724.803126658363972903393740660985
+
+def writeCsv = write(pwd/"accumWork.csv",(readdifficultySequenceFromFile zip accumNumHashesSequenceLog2 zip accumWorkSequence zipWithIndex).map{case(((d,h),w),i) => s"$i,$d,$h,$w\n"})
+
+//also, for reference, an old stack exchange answer: https://bitcoin.stackexchange.com/questions/26869/what-is-chainwork
+// however, the answer does not translate work all the way down into an independent representation of bits
+// instead they stop short and talk only about number of hashes
 
 
