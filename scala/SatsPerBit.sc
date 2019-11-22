@@ -111,4 +111,34 @@ def writeCsv = write(pwd/"accumWork.csv",(readdifficultySequenceFromFile zip acc
 // however, the answer does not translate work all the way down into an independent representation of bits
 // instead they stop short and talk only about number of hashes
 
+/**
+ If we can generalize the calculations above such that they can be done for any proof of work function, then we may be able to do some interesting things. Since the networks are different networks at the moment and do not necessarily share cryptographic hash functions, there may be one network (likely bitcoin) the network currency of which commands more work. Therefore, rather than work on automic swaps between networks and such, the largest network could instead simply offer to pay for the smaller network's work. 
+
+Using bitcoin as an example, the lightning network (or a dedicated public channel on it?) might be able to pay some amount of satoshis per bit of work. Naturally in order to verify the work, and hence be comfortable issuing payment, the work must be directed toward the most recent block header. So, in part, this is a way for bitcoin to "hire away" miners who are optimized for other proof of work algorithms and still reward them fairly according to the actual work they produce (e.g. bits of work, not simply hashes). Such a mechanism then opens the doors for bitcoin (or a layer on top of bitcoin like lightning) to be able to accept and pay for *any* proof of work, not simply sha256.
+**/
+
+
+def heightWithRewardWithWork = (workSequence zipWithIndex) map {case (w,i) => (i*2016,w)} map {case (b,w) => (b,BigDecimal(50.0) / BigDecimal(2).pow((b / 210000)),w)}
+
+/**
+  heightWithRewardWithWork.filter(_._3 > BigDecimal(0.0)).map{case (b,r,w) => (b,r*BigDecimal(100000000) / w)} 
+res18: IndexedSeq[(Int, BigDecimal)] = ArraySeq(
+  (38304, 2500000000.000000000000000000000001),
+  (40320, 1814956144.696797771797713298515522),
+  (42336, 1540778633.509139084521994822198782),
+  (44352, 1540778633.509139084521994822198782),
+  (46368, 1282007059.418245266979983105873054),
+  (48384, 1207230990.070512633302675781904222),
+  (50400, 1034240206.581049081375174059258474),
+  (52416, 1006886660.997351721483688093172313),
+  (54432, 1034240206.581049081375174059258474),
+  (56448, 926502233.3279606975905458701989304),
+  (58464, 911266632.5261823315966575263428562),
+  (60480, 884646872.7516237450502135248187980),
+...
+**/
+
+
+
+
 
