@@ -50,18 +50,18 @@ val num_hashes = current_difficulty * BigInt(2).pow(32)
 /**
   While num_hashes is a good start towards an estimate of time, but what we are really after is something more general.
 
-  If we think about this in a more information-theoretic way, there is a probability p = current_target / max_target
+  If we think about this in a more information-theoretic way, there is a probability p = current_target / 2^256
   that a flip of this "hash coin" will result in a number h such that h is less than or equal to current_target. This
   is predicated on the assumption that the output of the hash function approximates a uniform distribution.
 
   Calculating p is straightforward:
 */
-val p = BigDecimal(current_target) / BigDecimal(max_target)
+val p = BigDecimal(current_target) / BigDecimal(2.0).pow(256)
 
 // Now, let w be the entropy (in bits) pertaining to the number of failures (hashes) until the first success
 // This is a geometric distribution (https://en.wikipedia.org/wiki/Geometric_distribution)
 val w = (-(BigDecimal(1) - p)*log(BigDecimal(1)-p,2) - p*log(p,2)) / p
-// Performing the calculation, we get w = 44.974859 bits of work.
+// Performing the calculation, we get w = 76.9748595424 bits of work.
 
 /* Clearly w is a function of p and p is a function of difficulty. So, at least for bitcoin, we can create a simple function
    which performs the above steps for any difficulty it is given. Note, of course, that this function simply calculates what
@@ -70,7 +70,7 @@ val w = (-(BigDecimal(1) - p)*log(BigDecimal(1)-p,2) - p*log(p,2)) / p
 
 def calcMinimumBitcoinWork(difficulty: BigInt): BigDecimal = {
     // return right away if difficulty is 1, since, this gives p = 1 which yields entropy of 0
-    if(difficulty == BigInt(1)) return BigDecimal(0.0)
+    //if(difficulty == BigInt(1)) return BigDecimal(0.0)
 
     // why this is not 2^256 is because the lowest difficulty was based on iterating through 2^32 hashes
     val max_target = BigInt(2).pow(224)
@@ -80,7 +80,7 @@ def calcMinimumBitcoinWork(difficulty: BigInt): BigDecimal = {
     // let p be the probability of flipping heads on this extremely biased hash coin
     // since the output of the hash function is approximately uniformly distributed
     // calculating p is straightforward:
-    val p = BigDecimal(current_target) / BigDecimal(max_target)
+    val p = BigDecimal(current_target) / BigDecimal(2.0).pow(256) //BigDecimal(max_target)
  
     // let w be the entropy (in bits) pertaining to the number of failures (hashes) until the first success
     // this is a geometric distribution
@@ -96,7 +96,7 @@ def calcMinimumBitcoinWork(difficulty: BigInt): BigDecimal = {
  these additional constraints in a similarly information-theoretic way, the proof of work constraint, due to its massive number of iterations, 
  might dominate. For now we will assume that to be the case. Nevertheless, this may not be a wise assumption.
 
- Now back to our value of w. With w = 44.97 bits/block (at the example block height of 602,784), we are basically saying that, in expecation, 
+ Now back to our value of w. With w = 76.97 bits/block (at the example block height of 602,784), we are basically saying that, in expecation, 
  no fewer than 44.97 bits of work have been performed to create that block. Now, interestingly, the size of a block itself can also be measured 
  in terms of bits. Are they the same bits as those of the bits of work? At this point in our analysis we do not know. Nevertheless, if we 
  consider our block to be a "message" we can easily calculate a ratio of bits of work per bit of message.
@@ -115,15 +115,15 @@ val readdifficultySequenceFromFile: IndexedSeq[BigInt] = read.lines! pwd/"btcHis
 def workSequence = readdifficultySequenceFromFile map(calcMinimumBitcoinWork(_)) map(_ * BigDecimal(2016))
 
 //Finally, we take the sequence of work and calculate a running total. 
-def accumWorkSequence = workSequence.scanLeft(BigDecimal(0.0)){case (tot:BigDecimal, diff:BigDecimal) => tot + diff}
+def accumWorkSequence = (workSequence.scanLeft(BigDecimal(0.0)){case (tot:BigDecimal, diff:BigDecimal) => tot + diff}).drop(1)
 
 //Now, stopping for a moment to check our work, if we take look at the last value of the accumWorkSequence
 def accumulatedWork = accumWorkSequence.last
 /** 
- This gives us 17589203.10334326 bits of accumulated work. This is approximately 17.5 million bits or approximately 2.2 megabytes.
+ This gives us 36937050.5958 bits of accumulated work. This is approximately 36.9 million bits or approximately 4.62 megabytes.
 
  Can we safely interpret this to mean that it is fundamentally impossible to faithfully encode the bitcoin blockchain in fewer 
- than 2.2 megabytes? It seems so.
+ than 4.62 megabytes? It seems so.
 */
 
 
@@ -132,70 +132,32 @@ accumulated work (e.g accumulated number of hashes rather than bits of work). He
 number of hashes.
 */
 def numHashesSequence = readdifficultySequenceFromFile.map(_ * BigInt(2).pow(32) * BigInt(2016))
-def accumNumHashesSequenceLog2 = (numHashesSequence.scanLeft(BigInt(1)){case (tot: BigInt, hashes: BigInt) => tot + hashes}).map(n => BigDecimal(n).log(2))
+def accumNumHashesSequenceLog2 = (numHashesSequence.scanLeft(BigInt(1)){case (tot: BigInt, hashes: BigInt) => tot + hashes}).drop(1).map(n => BigDecimal(n).log(2))
 
 def writeCsv = write(pwd/"accumWork.csv",(readdifficultySequenceFromFile zip accumNumHashesSequenceLog2 zip accumWorkSequence zipWithIndex).map{case(((d,h),w),i) => s"${(i+1)*2016},$d,$h,$w\n"})
 /** this output is also available in the git repository as accumWork.csv
-    height,difficulty,accum_hashes,accum_work
-    2016,1,0E+37,0.0
-    4032,1,42.977279923500083089206077365700758589,0.0
-    6048,1,43.977279923499999779777762287819491647,0.0
-    8064,1,44.562242424221128191422062871404494537,0.0
-    10080,1,44.977279923499958125063604747074822850,0.0
-    12096,1,45.299208018387312141991092668270956441,0.0
-    14112,1,45.562242424221100421612624510507151935,0.0
-    16128,1,45.784634845557544380485220832190767986,0.0
-    18144,1,45.977279923499937297706525976251479621,0.0
-    20160,1,46.147204924942247346463217334037070023,0.0
-    22176,1,46.299208018387295480105429651540120445,0.0
-    24192,1,46.436711542137228873717594812700541586,0.0
-    26208,1,46.562242424221086536707905329858032264,0.0
-    28224,1,46.677719641641021447581385257034520066,0.0
-    30240,1,46.784634845557532479138318677324120714,0.0
-    32256,1,46.884170519108446107597280923201562637,0.0
-    34272,1,46.977279923499926884027986590727055799,0.0
-    36288,1,47.064742764750265679712726755327800228,0.0
-    38304,1,47.147204924942238089860071213559779495,0.0
-    40320,2,47.225207436943510733556473479070530925,0.0
-    42336,3,47.369597346278684693476423569627903955,4031.999999999999999999999999999998
-    44352,4,47.562242424221079594255545739483360337,9585.853204361552585432213132996391
-    46368,4,47.784634845557526528464867599853980030,16128.00000000000000000000000000000
-    48384,6,47.977279923499921677188716897936655837,22670.14679563844741456778686700360
-    50400,7,48.225207436943506348849720053559077697,30532.81800789694011889939328374334
-    52416,11,48.469133019829594883768502970734287140,38882.50425925074411225603802252615
-    54432,12,48.784634845557523553128142061109705426,48628.78944122222313266747324821124
-    56448,11,49.064742764750258328880816600791593538,58639.84668376772952091925085600563
-    58464,16,49.281060671677021503876184561879668264,68386.13186573920854133068608169072
-    60480,17,49.547135531830866065895987427735199357,79265.76025453760821457116086894959
-    ....elided...
-    570528,6393023717201,90.5177866993516850212747624961205736075,16063796.95547973359576827325060541
-    572544,6353030562983,90.5621544267059311862260576389519739844,16152465.33402090401748631148676849
-    574560,6702169884349,90.6049329897981667713439679552954743909,16241115.46073347039665104662651218
-    576576,6704632680587,90.6487284630669222949030508157517985946,16329921.18897142213903096539485378
-    578592,7459680720542,90.6912489174277881053324205952443748319,16418727.98576795183484936713725225
-    580608,7409399249090,90.7371301195992595826114824390014456191,16507845.15703096096686050374479017
-    582624,7934713219630,90.7813018654782636025090639291914974040,16596942.65755845164820593053219310
-    584640,9064159826491,90.8271521280184717002339143995652471236,16686239.38224449637399367930233372
-    586656,9013786945891,90.8778055585665470161893463120588653163,16775923.16929150879220032952726836
-    588672,9985348008059,90.9264732773219864879254577601757991801,16865590.74779953471924989168580543
-    590688,10183488432890,90.9785366611035809193225468656033477775,16955556.04789516180380420956432538
-    592704,10771996663680,91.0297660757473525573553862288282640579,17045578.49602293686260660055749587
-    594720,11890594958795,91.0820464050887502112008691591733183613,17135764.34868342372769090298306573
-    596736,12759819404408,91.1376376368821511022585479594365420805,17226237.55233851943248331192508581
-    598752,13008091666971,91.1950022344839190516935111145453688531,17316915.95859856320193168669392511
-    600768,13691480038694,91.2512256772816108744332475045157418729,17407650.41251930268515642118364336
-    602784,12720005267390,91.3081275449810860860464939716200853658,17498533.78650564005554251053858774
+    height,difficulty,accum_hashes_log2,accum_work
+2016,1,42.977279923500083089206077365700758589,67420.47320209355938532518718091770
+4032,1,43.977279923499999779777762287819491647,134840.9464041871187706503743618354
+6048,1,44.562242424221128191422062871404494537,202261.4196062806781559755615427531
+8064,1,44.977279923499958125063604747074822850,269681.8928083742375413007487236708
+10080,1,45.299208018387312141991092668270956441,337102.3660104677969266259359045885
+12096,1,45.562242424221100421612624510507151935,404522.8392125613563119511230855062
+14112,1,45.784634845557544380485220832190767986,471943.3124146549156972763102664239
+... elided ...
+586656,9013786945891,90.9264732773219864879254577601757991801,35697342.24031584069001596346930766
+588672,9985348008059,90.9785366611035809193225468656033477775,35851819.54041148534029336818675744
+590688,10183488432890,91.0297660757473525573553862288282640579,36006353.98853929175922931420431344
+592704,10771996663680,91.0820464050887502112008691591733183613,36161051.84119982318256318088458699
+594720,11890594958795,91.1376376368821511022585479594365420805,36316037.04485496816936039050908960
+596736,12759819404408,91.1950022344839190516935111145453688531,36471227.45111503699703993328751778
+598752,13008091666971,91.2512256772816108744332475045157418729,36626473.90503579497082155154529624
+600768,13691480038694,91.3081275449810860860464939716200853658,36781869.27902214368464836737095923
+602784,12720005267390,91.3590535150456863178396562084687568224,36937050.59585981672351616433255982
+
 */
 
-
 /**
-
- At first glance, it may seem strange or wrong that our calculations do not attribute any work in the information-theoretic absolute sence to the
- periods where difficulty is 1. There may in fact be an error in our calculations (though the methodology itself hopefully will still withstand
- scrutiny). However, it may also make a sense due to the fact that with difficuly 1, nearly any hash will do to solve a block. Though, the more likely
- scenario is that we have an off-by-one error somewhere in our code.
-
-
  If we can generalize the calculations above such that they can be done for any proof of work function, then we may be able to do some interesting
  things. Since the networks are different networks at the moment and do not necessarily share cryptographic hash functions, there may be one 
  network (likely bitcoin) the network currency of which commands more work. The largest network could instead simply pay for the work capabilities 
@@ -209,28 +171,25 @@ def writeCsv = write(pwd/"accumWork.csv",(readdifficultySequenceFromFile zip acc
 
  Lastly, below we do a quick calculation of satoshis rewarded per bit of work:
 **/
-def heightWithRewardWithWork = (workSequence zipWithIndex) map {case (w,i) => (i*2016,w)} map {case (b,w) => (b,BigDecimal(50.0) / BigDecimal(2).pow((b / 210000)),w)}
+def heightWithRewardWithWork = (workSequence zipWithIndex) map {case (w,i) => ((i+1)*2016,w)} map {case (b,w) => (b,BigDecimal(50.0) / BigDecimal(2).pow((b / 210000)),w)}
 
+def heightWithSatoshisPerByteOfWork = heightWithRewardWithWork.map{case (b,r,w) => (b,r*BigDecimal(100000000) / w)}
 /**
-  
-  val heightWithSatoshisPerByteOfWork = heightWithRewardWithWork.filter(_._3 > BigDecimal(0.0)).map{case (b,r,w) => (b,r*BigDecimal(100000000) / w)} 
-  (height, satoshis_per_bit_of_work)
-  (38304, 2500000000.000000000000000000000001),
-  (40320, 1814956144.696797771797713298515522),
-  (42336, 1540778633.509139084521994822198782),
-  (44352, 1540778633.509139084521994822198782),
-  (46368, 1282007059.418245266979983105873054),
-  (48384, 1207230990.070512633302675781904222),
-  (50400, 1034240206.581049081375174059258474),
-  (52416, 1006886660.997351721483688093172313),
-  (54432, 1034240206.581049081375174059258474),
-  (56448, 926502233.3279606975905458701989304),
-  (58464, 911266632.5261823315966575263428562),
-  (60480, 884646872.7516237450502135248187980),
-...
+    (height, satoshis_per_bit_of_work)
+    (2016,74161.44922347917608428870914467144)
+    (4032,74161.44922347917608428870914467144)
+    (6048,74161.44922347917608428870914467144)
+    (8064,74161.44922347917608428870914467144)
+    ... elided ...
+    (592704,8080.267298493126720390644034218565)
+    (594720,8065.286043571967844364626720585112)
+    (596736,8054.621610470198785115005982597483)
+    (598752,8051.713700578527276147300209894160)
+    (600768,8043.997500915380607542243748114668)
+    (602784,8055.093393153499477947423258021267)
 
- The above is simply looking at the rewards purely as a function of block subsidy and not accounting for fees. Additionally, it ignores the
- first periods where difficulty was 1. However, this is a first step towards understanding how an idealized "fee market" which should 
+ The above is simply looking at the rewards purely as a function of block subsidy and not accounting for fees. However, this is a 
+ first step towards understanding how an idealized "fee market" which should 
  probably more aptly be called a "work market" may be encouraged to develop.
  
  Further research is certainly necessary.
