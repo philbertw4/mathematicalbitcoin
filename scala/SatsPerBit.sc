@@ -36,32 +36,36 @@ import spire.implicits._
 
   As of block #602,784 the current difficulty is 12720005267390, and will remain so for the next 2016 blocks
 */
-val current_difficulty = BigInt("12720005267390")
 
-// approximating max target as 2^224 per https://bitcoin.stackexchange.com/questions/8806/what-is-difficulty-and-how-it-relates-to-target
-// why this is not 2^256 is because the lowest difficulty (a difficulty value of 1) was based on iterating through 2^32 hashes
-val max_target = BigInt(2).pow(224)
+object Example {
 
-val current_target = max_target / current_difficulty
+    val current_difficulty = BigInt("12720005267390")
 
-// The number of hashes, in expecation, it takes to find a block is given by 2^32 * current_difficulty.
-val num_hashes = current_difficulty * BigInt(2).pow(32)
+    // approximating max target as 2^224 per https://bitcoin.stackexchange.com/questions/8806/what-is-difficulty-and-how-it-relates-to-target
+    // why this is not 2^256 is because the lowest difficulty (a difficulty value of 1) was based on iterating through 2^32 hashes
+    val max_target = BigInt(2).pow(224)
 
-/**
-  While num_hashes is a good start towards an estimate of time, but what we are really after is something more general.
+    val current_target = max_target / current_difficulty
 
-  If we think about this in a more information-theoretic way, there is a probability p = current_target / 2^256
-  that a flip of this "hash coin" will result in a number h such that h is less than or equal to current_target. This
-  is predicated on the assumption that the output of the hash function approximates a uniform distribution.
+    // The number of hashes, in expecation, it takes to find a block is given by 2^32 * current_difficulty.
+    val num_hashes = current_difficulty * BigInt(2).pow(32)
 
-  Calculating p is straightforward:
-*/
-val p = BigDecimal(current_target) / BigDecimal(2.0).pow(256)
+    /**
+      While num_hashes is a good start towards an estimate of time, but what we are really after is something more general.
 
-// Now, let w be the entropy (in bits) pertaining to the number of failures (hashes) until the first success
-// This is a geometric distribution (https://en.wikipedia.org/wiki/Geometric_distribution)
-val w = (-(BigDecimal(1) - p)*log(BigDecimal(1)-p,2) - p*log(p,2)) / p
-// Performing the calculation, we get w = 76.9748595424 bits of work.
+      There is a probability p = current_target / 2^256 that a flip of this "hash coin" will result in a number h such that 
+      h is less than or equal to current_target. This is predicated on the assumption that the output of the hash function 
+      approximates a uniform distribution.
+
+      Calculating p is straightforward:
+    */
+    val p = BigDecimal(current_target) / BigDecimal(2.0).pow(256)
+
+    // Now, let w be the entropy (in bits) pertaining to the number of failures (hashes) until the first success
+    // This is a geometric distribution (https://en.wikipedia.org/wiki/Geometric_distribution)
+    val w = (-(BigDecimal(1) - p)*log(BigDecimal(1)-p,2) - p*log(p,2)) / p
+    // Performing the calculation, we get w = 76.9748595424 bits of work.
+}
 
 /* Clearly w is a function of p and p is a function of difficulty. So, at least for bitcoin, we can create a simple function
    which performs the above steps for any difficulty it is given. Note, of course, that this function simply calculates what
@@ -73,14 +77,15 @@ def calcMinimumBitcoinWork(difficulty: BigInt): BigDecimal = {
     //if(difficulty == BigInt(1)) return BigDecimal(0.0)
 
     // why this is not 2^256 is because the lowest difficulty was based on iterating through 2^32 hashes
-    val max_target = BigInt(2).pow(224)
+    // max target = (2^16 - 1) * 2^208
+    val max_target = (BigInt(2).pow(16)-1)*BigInt(2).pow(208)
 
     val current_target = max_target / difficulty
     
     // let p be the probability of flipping heads on this extremely biased hash coin
     // since the output of the hash function is approximately uniformly distributed
     // calculating p is straightforward:
-    val p = BigDecimal(current_target) / BigDecimal(2.0).pow(256) //BigDecimal(max_target)
+    val p = BigDecimal(current_target) / BigDecimal(2.0).pow(256)
  
     // let w be the entropy (in bits) pertaining to the number of failures (hashes) until the first success
     // this is a geometric distribution
@@ -136,7 +141,7 @@ def accumNumHashesSequenceLog2 = (numHashesSequence.scanLeft(BigInt(1)){case (to
 
 def writeCsv = write(pwd/"accumWork.csv",(readdifficultySequenceFromFile zip accumNumHashesSequenceLog2 zip accumWorkSequence zipWithIndex).map{case(((d,h),w),i) => s"${(i+1)*2016},$d,$h,$w\n"})
 /** this output is also available in the git repository as accumWork.csv
-    height,difficulty,accum_hashes_log2,accum_work
+    height,difficulty,accum_hashes_log2,accum_work_bits
 2016,1,42.977279923500083089206077365700758589,67420.47320209355938532518718091770
 4032,1,43.977279923499999779777762287819491647,134840.9464041871187706503743618354
 6048,1,44.562242424221128191422062871404494537,202261.4196062806781559755615427531
