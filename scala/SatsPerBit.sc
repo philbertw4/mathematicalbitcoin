@@ -204,7 +204,25 @@ def heightWithSatoshisPerBitOfWork = heightWithRewardWithWork.map{case (b,r,w) =
 **/
 
 
+/*
+Adding some more quick thoughts here: 
+If we take the block in the example (#602784) which has 76.97 bits of work, and we look at the
+size of the block (also measured in bits), we can begin reframing our discussion thus. Miners buy bits of space in exchange for bits
+of work. For this block, they paid 76.97 bits, and received 9999944 bits of space. That works out to be approximately 16.2 kiloBytes
+of space per bit of work. Some of this space is unusable since it was used to communicate the proof-of-work itself, but otherwise
+it is that simple. 
 
+In other words, it is not the nodes (e.g. transactions) which are buying block space from the miners, it is
+actually the miners which are buying blockspace from the nodes. Of course, the nodes are smart, and resource concious, so they only
+form of payment which they (collectively) will accept is bits of work. This makes sense because bits of work represent, almost by definition,
+energy which is unavailable for future work by the system (2nd law of thermodynamics). As such, it is a form of payment, and perhaps the only
+form of payment, which can be universally verified.
+
+Notice that there is no mention of "satoshis" in the prior arguments. Satoshis are usually considered to be the reward which miners receive. Yet,
+by the above arguments, it seems that when we look at this through a purely information-theoretic lense, the actual trade that is happening is
+bits of past work in exchange for representation of bits in future space. Now, we are really reaching here, but can this be taken a step further
+to infer that proof-of-work *is* the singularity? Ha, probably a bit to far.
+*/
 
 
 
