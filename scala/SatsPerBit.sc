@@ -224,7 +224,59 @@ bits of past work in exchange for representation of bits in future space. Now, w
 to infer that proof-of-work *is* the singularity? Ha, probably a bit to far.
 */
 
+/*
+## A note about difficulty vs. target.
+In the block headers of bitcoin, difficulty is actually not represented. Instead, what is represented is the target. To further complicate things,
+for efficiency purposes, the target is not represented "simply" as a 256 bit number. Instead, it is represnted in a compact form. This compact form
+is called "nBits" or sometimes "bits" in the bitcoin protocol pertaining to the block header. (see: https://bitcoin.stackexchange.com/questions/2924/how-to-calculate-new-bits-value). We should probably consider reworking these calculations to use the "bits" field directly rather than the (interpreted) difficulty.
 
+## A proof of work protocol without the use of timestamps?
+Bitcoin adjusts the difficulty of its mining algorithm every 2016 blocks. However, the math it uses to make this adjustment (to calculate the new "bits"
+parameter that will be used going forward) is based upon timestamps which are inserted into blocks by miners. Since these timestamps are represented
+simply as integers (unix timestamps), then it is possible to perform simple math on timestamps. For example, for any two unix timestamps, we can 
+calculate the difference (in seconds) between them. If the difference between the two timestamps is greater than 8 weeks or less than half a week, then 
+the calculation is truncated. This ensures that difficulty cannot increase or decrease by more than a factor of 4 every two weeks. There are some economic
+and practical reasons for this[1]. Additionally, there are some constraints that nodes[2] use to try to encourage miners to be truthful with regard to
+timestamps they choose to embed in a block. Thankfully, at least so far in bitcoin's evolution, the protocol has been reasonably robust and has achieved
+its goal of targeting one block every ten minutes.
+
+Despite the convenience of doing these calculations in "human terms" based on these miner-chosen timestamps, here we are investigating whether
+it is possible to implement the same sort of algorithm but in a purely information-theoretical sense. As such, the math which bitcoin usually does with
+unix timestamps would instead be done with bits of entropy. One question we must ask ourselves is, what "bit rate" (bits of work per bits of message")
+should be targeted? Does it make sense to target a constant rate in the same way that bitcoin targets a constant block rate? 
+
+We feel like time is linear, so it makes sense for bitcoin to target a constant block rate. However, Einstein showed not only that time may not be linear, but that it might even be an illusion! In this view of the world, time and space are intertwined. The common link between the two is represented by
+the speed of light, and specifically the notions of time dialation and length contraction. This is often shown graphically on a spacetime diagram with
+the vertical axis representing time, and the horizontal representing space. Both axis actually share a unit, meters, when the vertical axis is given in
+the form `ct` where `c` is the speed of light in meters per second and time `t` is given in seconds.
+
+We could be drastically overreaching and oversimplifying, but perhaps the notion of the "constant spead of light" in the world of bits we are discussing
+is embodied by an entropic metric? Does such a notion exist? In special relativity, the diagonal of the lightcone has slope `c`. The speed of light is a
+conversion from meters to seconds and vice versa. Do we have a similar conversion when thinking in terms of "bits of work" versus "bits of message?"
+Naively, it seems reasonable to think that for every bit of message sent, at least one bit of work must be performed. 
+
+Now, can we send one bit of message in fewer with fewer than one bit of work? Surely the fact that, by definition, the message itself must be 
+constructed requires at least one bit of work. Why? If a message of m bits required fewer than m-1 bits to construct, then the message m could be
+manifest globally by anyone who posesses m-1 bits. And so on and so forth. This, of course, violates what we currently
+observe about the world. It takes at least a modicum of work to construct a message.
+
+So, if we have established that it takes greater than m bits of work, to construct an m bit message, then what number of bits is the minimum? By a
+similar inductive method, it must take only m+1 bits to construct a message of m bits in length. "Is it message m?" is a question that an observer
+might ask. An efficient observer might shorten it to "m?", and an extremely efficient observer may shorten it to "m" itself. Here things take a strange
+turn. We can postulate that the observer who shortens the statement to "m" must in fact be the creator of the message itself. Therefore, "m?" is the
+natural minimal step into the realm of an observer who was not the creator of m.
+
+This has now become a longwinded train of thought and certainly needs some editing. However, for sake of completeness, can we safely say that, rather
+than every observer measuring the spead of light to be equivalent, instead we should say "every observer will view the optimal encoding of a message
+to be equivalent?" In the world of bits, does "optimal encoding" play the same role as the speed of light in the everyday physical (analog?) world? Is
+this basically what quantum information theory is? Two observers asking questions about the universe will agree on the outcome so long as each encodes
+the message within the same "work cone?"
+
+[1] (note: reasons need to to be investigated/remembered/referenced...seem to remember seeing a similar bounding procedue for unique bid auctions). 
+
+However, what we are discussing here is the notion of replacing timestamps 
+
+*/
 
 // misc notes: 
 // for reference, an old stack exchange answer: https://bitcoin.stackexchange.com/questions/26869/what-is-chainwork
