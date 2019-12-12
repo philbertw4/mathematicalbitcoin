@@ -221,7 +221,8 @@ form of payment, which can be universally verified.
 Notice that there is no mention of "satoshis" in the prior arguments. Satoshis are usually considered to be the reward which miners receive. Yet,
 by the above arguments, it seems that when we look at this through a purely information-theoretic lense, the actual trade that is happening is
 bits of past work in exchange for representation of bits in future space. Now, we are really reaching here, but can this be taken a step further
-to infer that proof-of-work *is* the singularity? Ha, probably a bit to far.
+to infer that proof-of-work *is* the singularity? Ha, probably a bit too far.
+
 */
 
 /*
@@ -235,7 +236,7 @@ Bitcoin adjusts the difficulty of its mining algorithm every 2016 blocks. Howeve
 parameter that will be used going forward) is based upon timestamps which are inserted into blocks by miners. Since these timestamps are represented
 simply as integers (unix timestamps), then it is possible to perform simple math on timestamps. For example, for any two unix timestamps, we can 
 calculate the difference (in seconds) between them. If the difference between the two timestamps is greater than 8 weeks or less than half a week, then 
-the calculation is truncated. This ensures that difficulty cannot increase or decrease by more than a factor of 4 every two weeks. There are some economic
+the calculation is truncated. This ensures that difficulty cannot increase or decrease by more than a factor of 4. There are some economic
 and practical reasons for this[1]. Additionally, there are some constraints that nodes[2] use to try to encourage miners to be truthful with regard to
 timestamps they choose to embed in a block. Thankfully, at least so far in bitcoin's evolution, the protocol has been reasonably robust and has achieved
 its goal of targeting one block every ten minutes.
@@ -245,22 +246,24 @@ it is possible to implement the same sort of algorithm but in a purely informati
 unix timestamps would instead be done with bits of entropy. One question we must ask ourselves is, what "bit rate" (bits of work per bits of message")
 should be targeted? Does it make sense to target a constant rate in the same way that bitcoin targets a constant block rate? 
 
-We feel like time is linear, so it makes sense for bitcoin to target a constant block rate. However, Einstein showed not only that time may not be linear, but that it might even be an illusion! In this view of the world, time and space are intertwined. The common link between the two is represented by
-the speed of light, and specifically the notions of time dialation and length contraction. This is often shown graphically on a spacetime diagram with
+We feel like time is linear, so it makes sense for bitcoin to target a constant block rate. However, Einstein showed not only that time may not be linear, 
+but that it might even be an illusion! In this view of the world, time and space are intertwined. The common link between the two is represented by
+the speed of light, and the notions of time dialation and length contraction. This is often shown graphically on a spacetime diagram with
 the vertical axis representing time, and the horizontal representing space. Both axis actually share a unit, meters, when the vertical axis is given in
-the form `ct` where `c` is the speed of light in meters per second and time `t` is given in seconds.
+the form `ct` where `c` is the speed of light in meters per second and time `t` is given in seconds. Equivalently, either axis can be interpreted in
+terms of "light seconds" intead of meters.
 
 We could be drastically overreaching and oversimplifying, but perhaps the notion of the "constant spead of light" in the world of bits we are discussing
 is embodied by an entropic metric? Does such a notion exist? In special relativity, the diagonal of the lightcone has slope `c`. The speed of light is a
 conversion from meters to seconds and vice versa. Do we have a similar conversion when thinking in terms of "bits of work" versus "bits of message?"
 Naively, it seems reasonable to think that for every bit of message sent, at least one bit of work must be performed. 
 
-Now, can we send one bit of message in fewer with fewer than one bit of work? Surely the fact that, by definition, the message itself must be 
-constructed requires at least one bit of work. Why? If a message of m bits required fewer than m-1 bits to construct, then the message m could be
+Now, can we send one bit of message with fewer than one bit of work? Surely the fact that, by definition, the message itself must be 
+constructed requires at least one bit of work. Why? If a message of m bits required fewer than m bits to construct, then the message m could be
 manifest globally by anyone who posesses m-1 bits. And so on and so forth. This, of course, violates what we currently
 observe about the world. It takes at least a modicum of work to construct a message.
 
-So, if we have established that it takes greater than m bits of work, to construct an m bit message, then what number of bits is the minimum? By a
+So, if we have established that it takes greater than or equal to m bits of work, to construct an m bit message, then what number of bits is the minimum? By a
 similar inductive method, it must take only m+1 bits to construct a message of m bits in length. "Is it message m?" is a question that an observer
 might ask. An efficient observer might shorten it to "m?", and an extremely efficient observer may shorten it to "m" itself. Here things take a strange
 turn. We can postulate that the observer who shortens the statement to "m" must in fact be the creator of the message itself. Therefore, "m?" is the
@@ -272,7 +275,8 @@ to be equivalent?" In the world of bits, does "optimal encoding" play the same r
 this basically what quantum information theory is? Two observers asking questions about the universe will agree on the outcome so long as each encodes
 the message within the same "work cone?"
 
-[1] (note: reasons need to to be investigated/remembered/referenced...seem to remember seeing a similar bounding procedue for unique bid auctions). 
+[1] (note: reasons need to to be investigated/remembered/referenced...seem to remember seeing a similar bounding procedue for unique bid auctions).
+[2] Nodes do not accept chains which include timestamps that are too far in the future, according to the node's own clock.  
 
 However, what we are discussing here is the notion of replacing timestamps 
 
